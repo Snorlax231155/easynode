@@ -8,11 +8,11 @@ An automated deep learning and radiomics framework for pulmonary (lung) nodule m
 
 ### 1. Benchmark Results
 
-| Model Architecture | Accuracy (%) | ROC-AUC | Precision (Malignant) | Recall (Malignant) | F1-Score | Training Time (CPU) |
+| Model Architecture | Accuracy (%) | ROC-AUC | Precision (Malignant) | Specificity (Benign) | F1-Score | Training Time (CPU) |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|
-| **Initial Codebase** | ~54.8% (Majority Guess) | 0.500 | 0.548 | 1.000 (Trivial) | 0.708 | >30 mins (Hung) |
-| **Fast Gabor-CapsNet (Axial View)** | **64.60%** | **0.7040** | **0.662** | **0.726** | **0.692** | **<60 seconds** |
-| **3D Volumetric Radiomics & Synergy** | **66.37% - 69.91%** | **0.7347 - 0.7457** | **0.739 (74%)** | **0.650** | **0.692** | **<50 seconds** |
+| **Initial Codebase** | ~54.8% (Majority Guess) | 0.500 | 0.548 | 0.0% (Trivial) | 0.708 | >30 mins (Hung) |
+| **Fast Gabor-CapsNet (Axial View)** | **61.06%** | **0.7018** | **0.661** | **62.7% (32/51)** | **0.627** | **<60 seconds** |
+| **3D Volumetric Radiomics & Synergy** | **71.68%** | **0.7056** | **0.857 (85.7%)** | **88.2% (45/51)** | **0.692** | **<50 seconds** |
 
 ---
 
@@ -21,23 +21,23 @@ An automated deep learning and radiomics framework for pulmonary (lung) nodule m
 #### A. Fast Gabor-CapsNet (Axial Orthogonal View)
 ```
                   Predicted Benign (0)    Predicted Malignant (1)
-True Benign (0)           21                       30
-True Malignant (1)        10                       52
+True Benign (0)           32                       19
+True Malignant (1)        25                       37
 ```
-* **True Negatives (Benign)**: 21 / 51
-* **True Positives (Malignant)**: 52 / 62 (83.9% sensitivity)
-* **Overall Accuracy**: **64.60%** | **ROC-AUC**: **0.7040**
+* **True Negatives (Benign)**: 32 / 51 (**62.7% Specificity**)
+* **True Positives (Malignant)**: 37 / 62 (59.7% Sensitivity)
+* **Overall Accuracy**: **61.06%** | **ROC-AUC**: **0.7018**
 
 #### B. 3D Volumetric Radiomics & Deep CapsNet Synergy ("The Right Way")
 ```
                   Predicted Benign (0)    Predicted Malignant (1)
-True Benign (0)           39                       12
-True Malignant (1)        28                       34
+True Benign (0)           45                        6
+True Malignant (1)        26                       36
 ```
-* **True Negatives (Benign)**: 39 / 51 (**76.5% Specificity**)
-* **True Positives (Malignant)**: 34 / 62
-* **Malignancy Precision**: **74.0%** (Only 12 false positives out of 51 benign cases)
-* **Overall Accuracy**: **64.60% - 66.4%** | **ROC-AUC**: **0.7347 - 0.7457**
+* **True Negatives (Benign)**: 45 / 51 (**88.2% Specificity**)
+* **True Positives (Malignant)**: 36 / 62
+* **Malignancy Precision**: **85.7%** (Only 6 false positives out of 51 benign cases!)
+* **Overall Accuracy**: **71.68% (81 / 113 correct)** | **ROC-AUC**: **0.7056**
 
 ---
 

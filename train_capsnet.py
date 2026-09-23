@@ -241,23 +241,8 @@ def make_dataset(X, y, batch_size, shuffle=False):
 
 
 # ----------------------------------------------------------------
-# Train / val steps
+# Train / val steps (defined per model inside train_model)
 # ----------------------------------------------------------------
-@tf.function
-def train_step(model, optimizer, x_batch, y_batch):
-    with tf.GradientTape() as tape:
-        v, reconstructed = model([x_batch, y_batch], training=True)
-        loss, ml, rl     = total_loss(y_batch, v, x_batch, reconstructed)
-    grads = tape.gradient(loss, model.trainable_variables)
-    optimizer.apply_gradients(zip(grads, model.trainable_variables))
-    return loss, ml, rl
-
-
-@tf.function
-def val_step(model, x_batch, y_batch):
-    v, reconstructed = model([x_batch, y_batch], training=False)
-    loss, ml, rl     = total_loss(y_batch, v, x_batch, reconstructed)
-    return loss, v
 
 
 # ----------------------------------------------------------------
@@ -304,6 +289,21 @@ def train_model(axis, split_data_ax, epochs, batch_size, save_dir, log_writer):
     lr_schedule = tf.keras.optimizers.schedules.CosineDecay(1e-3, decay_steps=epochs * (len(X_train)//batch_size + 1), alpha=0.1)
     optimizer   = tf.keras.optimizers.Adam(learning_rate=lr_schedule)
 
+    @tf.function
+    def train_step(x_batch, y_batch):
+        with tf.GradientTape() as tape:
+            v, reconstructed = model([x_batch, y_batch], training=True)
+            loss, ml, rl     = total_loss(y_batch, v, x_batch, reconstructed)
+        grads = tape.gradient(loss, model.trainable_variables)
+        optimizer.apply_gradients(zip(grads, model.trainable_variables))
+        return loss, ml, rl
+
+    @tf.function
+    def val_step(x_batch, y_batch):
+        v, reconstructed = model([x_batch, y_batch], training=False)
+        loss, ml, rl     = total_loss(y_batch, v, x_batch, reconstructed)
+        return loss, v
+
     train_ds   = make_dataset(X_train, y_train, batch_size, shuffle=True)
     val_ds     = make_dataset(X_val,   y_val,   batch_size, shuffle=False)
 
@@ -315,7 +315,7 @@ def train_model(axis, split_data_ax, epochs, batch_size, save_dir, log_writer):
         train_loss_sum = 0.0
         n_batches      = 0
         for (x_b, y_b), _ in train_ds:
-            loss, _, _ = train_step(model, optimizer, x_b, y_b)
+            loss, _, _ = train_step(x_b, y_b)
             train_loss_sum += float(loss)
             n_batches += 1
         train_loss_avg = train_loss_sum / max(n_batches, 1)
@@ -323,7 +323,7 @@ def train_model(axis, split_data_ax, epochs, batch_size, save_dir, log_writer):
         val_loss_sum = 0.0
         n_val = 0
         for (x_b, y_b), _ in val_ds:
-            vloss, _ = val_step(model, x_b, y_b)
+            vloss, _ = val_step(x_b, y_b)
             val_loss_sum += float(vloss)
             n_val += 1
         val_loss_avg = val_loss_sum / max(n_val, 1)

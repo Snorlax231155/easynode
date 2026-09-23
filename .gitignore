@@ -1,1 +1,3 @@
 archive (1)/DataSet_all.npy
+__pycache__/
+*.pyc
